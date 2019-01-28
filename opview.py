@@ -37,8 +37,8 @@ class TextBox(ScrolledText):
         start = self._offset_to_coord(start)
         end = self._offset_to_coord(end)
         self.tag_add("sel", start, end)
-        self.see(start)
         self.see(end)
+        self.see(start)
 
     def _offset_to_coord(self, value):
         text = self.get(1.0, "end")
@@ -96,6 +96,7 @@ class ListView(ttk.Treeview):
         self.configure(yscrollcommand=scroll.set)
         scroll.configure(command=self.yview)
         self.bind("<<TreeviewSelect>>", self._select_bind)
+        self.tag_configure("NoSource", background='#272727')
 
     def pack(self, *args, **kwargs):
         self._frame.pack(*args, **kwargs)
@@ -116,7 +117,8 @@ class ListView(ttk.Treeview):
             return
         pc = self.selection()[0]
         tag = self.item(pc, 'tags')[0]
-        
+        if tag == "NoSource":
+            return
         self.tag_configure(tag, background='#2a4864')
         self._last = tag
         if not pcMap[pc]['contract']:
@@ -207,7 +209,11 @@ for contract in sorted(set(i['contract'] for i in compiled['pcMap'] if i['contra
     note.add(code, contract.rsplit('/')[-1])
 
 for op in compiled['pcMap']:
-    tree.insert([op['pc'], op['op']], ["{0[start]}:{0[stop]}:{0[contract]}".format(op)])
+    if op['contract']:
+        tag = "{0[start]}:{0[stop]}:{0[contract]}".format(op)
+    else:
+        tag = "NoSource"
+    tree.insert([op['pc'], op['op']], [tag])
 
 
 pcMap = dict((str(i.pop('pc')), i) for i in compiled['pcMap'])
