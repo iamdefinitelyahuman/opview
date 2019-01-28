@@ -5,12 +5,13 @@ import json
 import sys
 import time
 import tkinter as tk
+import tkinter.font as tkFont
 from tkinter.scrolledtext import ScrolledText
 from tkinter import ttk
 
 
 class Notebook(ttk.Notebook):
-    
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -18,7 +19,7 @@ class Notebook(ttk.Notebook):
         self._frames = {}
         parent.bind("<Left>", self.key_left)
         parent.bind("<Right>", self.key_right)
-    
+
     def add(self, text, label):
         frame = TextBox(self, width=90, height=35)
         frame.set_text(text)
@@ -26,11 +27,11 @@ class Notebook(ttk.Notebook):
         frame._id = len(self._frames)
         frame._label = label
         self._frames[label] = frame
-    
+
     def active_frame(self):
         id_ = self.index(self.select())
         return next(v for v in self._frames.values() if v._id == id_)
-    
+
     def is_active(self, label):
         if self.index(self.select()) == self._frames[label]._id:
             return True
@@ -38,13 +39,13 @@ class Notebook(ttk.Notebook):
     
     def set_active(self, label):
         self.select(self._frames[label])
-        
+
     def key_left(self, event):
         try:
             self.select(self.index(self.select())-1)
         except:
             self.select(len(self._frames)-1)
-    
+
     def key_right(self, event):
         try: 
             self.select(self.index(self.select())+1)
@@ -63,9 +64,12 @@ class TextBox(ScrolledText):
             foreground="#ECECEC",
             selectforeground="white",
             selectbackground="#4a6984",
-            inactiveselectbackground="#4a6984"
+            inactiveselectbackground="#4a6984",
+            tabs=tkFont.Font(font=self['font']).measure('    '),
+            wrap="none"
         )
         self.bind('<ButtonRelease-1>', self._search)
+
 
     def set_text(self, text):
         self['state'] = "normal"
@@ -75,7 +79,7 @@ class TextBox(ScrolledText):
 
     def clear_highlight(self):
         self.tag_remove("sel", 1.0, "end")
-    
+
     def highlight(self, start, end):
         self.clear_highlight()
         start = self._offset_to_coord(start)
@@ -91,18 +95,18 @@ class TextBox(ScrolledText):
         offset = len(text[:value].split('\n')[-1])
         return "{}.{}".format(line, offset)
 
-    
     def _coord_to_offset(self, value):
         row, col = [int(i) for i in value.split('.')]
         text = self.get(1.0, "end").split('\n')
         return sum(len(i)+1 for i in text[:row-1])+col
-    
+
     def _search(self, event):
         if not self.tag_ranges('sel'):
             tree.clear_selection()
             return
         start, stop = [self._coord_to_offset(i.string) for i in self.tag_ranges('sel')]
-        pc = [k for k,v in pcMap.items() if 
+        pc = [
+            k for k,v in pcMap.items() if 
             v['contract'] and self._label in v['contract'] and
             start >= v['start'] and stop <= v['stop']
         ]
@@ -112,7 +116,7 @@ class TextBox(ScrolledText):
             return
         id_ = sorted(
             pc,
-            key=lambda k: (start-pcMap[k]['start'])+(pcMap[k]['stop']-stop)
+            key=lambda k: (start-pcMap[k]['start']) + (pcMap[k]['stop']-stop)
         )[0]
         tree.selection_set(id_)
 
@@ -160,7 +164,7 @@ class ListView(ttk.Treeview):
 
     def clear_selection(self):
         self.selection_remove(self.selection())
-    
+
     def _select_bind(self, event):
         self.tag_configure(self._last, background='')
         if not self.selection():
@@ -179,7 +183,7 @@ class ListView(ttk.Treeview):
             return
         note.set_active(pcMap[pc]['contract'].split('/')[-1])
         note.active_frame().highlight(pcMap[pc]['start'],pcMap[pc]['stop'])
-    
+
     def selection_set(self, id_):
         if id_=="0":
             id_="I001"
@@ -191,7 +195,8 @@ class ListView(ttk.Treeview):
             self._seek_buffer = ""
         self._seek_last = time.time()
         self._seek_buffer += event.char
-        id_ = next(str(i) for i in sorted([int(i) for i in pcMap])[::-1] if i<=int(self._seek_buffer))
+        pc = sorted([int(i) for i in pcMap])[::-1]
+        id_ = next(str(i) for i in pc if i<=int(self._seek_buffer))
         self.selection_set(id_)
 
 
