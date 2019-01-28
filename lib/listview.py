@@ -32,6 +32,8 @@ class ListView(ttk.Treeview):
         scroll.configure(command=self.yview)
         self.tag_configure("NoSource", background='#272727')
         self.bind("<<TreeviewSelect>>", self._select_bind)
+        self.bind('a', self._show_all)
+        self.bind('s', self._show_scope)
         for i in range(10):
             root.bind(str(i), self._seek)
 
@@ -52,8 +54,6 @@ class ListView(ttk.Treeview):
         self.selection_remove(self.selection())
 
     def selection_set(self, id_):
-        if id_=="0":
-            id_="I001"
         self.see(id_)
         super().selection_set(id_)
         self.focus_set()
@@ -61,24 +61,23 @@ class ListView(ttk.Treeview):
 
     def _select_bind(self, event):
         self.tag_configure(self._last, background='')
-        if not self.selection():
+        try:
+            pc = self.selection()[0]
+        except IndexError:
             return
         pcMap = self._parent.pcMap
         note = self._parent.note
-        pc = self.selection()[0]
         tag = self.item(pc, 'tags')[0]
         if tag == "NoSource":
             note.active_frame().clear_highlight()
             return
         self.tag_configure(tag, background='#2a4864')
         self._last = tag
-        if pc == "I001":
-            pc = "0"
         if not pcMap[pc]['contract']:
             note.active_frame().clear_highlight()
             return
         note.set_active(pcMap[pc]['contract'].split('/')[-1])
-        note.active_frame().highlight(pcMap[pc]['start'],pcMap[pc]['stop'])
+        note.active_frame().highlight(pcMap[pc]['start'], pcMap[pc]['stop'])
 
     def _seek(self, event):
         if self._seek_last < time.time() - 1:
@@ -88,3 +87,27 @@ class ListView(ttk.Treeview):
         pc = sorted([int(i) for i in self._parent.pcMap])[::-1]
         id_ = next(str(i) for i in pc if i<=int(self._seek_buffer))
         self.selection_set(id_)
+
+    def _show_all(self, event):
+        self._parent.note.clear_scope()
+        for i in sorted(self._parent.pcMap, key= lambda k: int(k)):
+            self.move(i, '', i)
+        if self.selection():
+            self.see(self.selection()[0])
+
+    def _show_scope(self, event):
+        if not self.selection():
+            return
+        pc = self._parent.pcMap[self.selection()[0]]
+        if not pc['contract']:
+            return
+        for key, value in sorted(self._parent.pcMap.items(), key= lambda k: int(k[0])):
+            if (
+                not value['contract'] or value['contract']!=pc['contract'] or
+                value['start'] < pc['start'] or value['stop']>pc['stop']
+            ):
+                self.detach(key)
+            else:
+                self.move(key, '', key)
+        self.see(self.selection()[0])
+        self._parent.note.apply_scope(pc['start'], pc['stop'])

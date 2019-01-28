@@ -13,7 +13,7 @@ class Root(tk.Tk):
     def __init__(self):
         super().__init__(className="Opcode Viewer - {}".format(sys.argv[-1]))
         self.bind("<Escape>", lambda k: self.quit())
-        
+
         self.note = TextBook(self)
         self.note.pack(side="left")
 
@@ -28,6 +28,7 @@ class Root(tk.Tk):
             self.note.add(code, contract.rsplit('/')[-1])
 
         first = compiled['pcMap'][0].copy()
+        self.note.set_active(first['contract'].rsplit('/')[-1])
         for op in compiled['pcMap']:
             if (
                 op['contract'] == first['contract'] and
@@ -39,7 +40,7 @@ class Root(tk.Tk):
                 tag = "{0[start]}:{0[stop]}:{0[contract]}".format(op)
             else:
                 tag = "NoSource"
-            self.tree.insert([op['pc'], op['op']], [tag])
+            self.tree.insert([str(op['pc']), op['op']], [tag])
 
         self.pcMap = dict((str(i.pop('pc')), i) for i in compiled['pcMap'])
-
+        

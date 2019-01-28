@@ -30,7 +30,9 @@ This opens the opview GUI.
 
 * Selecting an opcode will highlight the associated source code.
 * Highlighting a section of the source will jump to the most relevent opcode, if one exists.
+* Type a pc number to jump to that opcode.
 * Opcodes with a darkened background have no associated source code.
+* Select a section of source code and press ``S`` to enter scope mode. The opcodes will be filtered to only display codes related to the relevent code. Press ``A`` to disable and see all opcodes again.
 
 ## Development
 

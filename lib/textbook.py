@@ -15,6 +15,7 @@ class TextBook(ttk.Notebook):
     def __init__(self, root):
         super().__init__(root)
         self._parent = root
+        self._scope = None
         self.configure(padding=0)
         self._frames = {}
         root.bind("<Left>", self.key_left)
@@ -51,6 +52,22 @@ class TextBook(ttk.Notebook):
         except:
             self.select(0)
 
+    def apply_scope(self, start, stop):
+        self.clear_scope()
+        frame = self.active_frame()
+        self._scope = [frame, start, stop]
+        start = frame._offset_to_coord(start)
+        stop = frame._offset_to_coord(stop)
+        frame.tag_add('dark', 1.0, start)
+        frame.tag_add('dark', stop, 'end')
+        for f in [v for v in self._frames.values() if v!=frame]:
+            f.tag_add('dark', 1.0, 'end')
+
+    def clear_scope(self):
+        for f in self._frames.values():
+            f.tag_remove('dark', 1.0, 'end')
+        self._scope = None
+
     def _search(self, event):
         frame = self.active_frame()
         tree = self._parent.tree
@@ -58,11 +75,18 @@ class TextBook(ttk.Notebook):
             tree.clear_selection()
             return
         start, stop = [frame._coord_to_offset(i.string) for i in frame.tag_ranges('sel')]
-        pc = [
-            k for k,v in self._parent.pcMap.items() if 
-            v['contract'] and frame._label in v['contract'] and
-            start >= v['start'] and stop <= v['stop']
-        ]
+        if self._scope and (
+            frame != self._scope[0] or
+            start<self._scope[1] or
+            stop>self._scope[2]
+        ):
+            pc = False
+        else:
+            pc = [
+                k for k,v in self._parent.pcMap.items() if 
+                v['contract'] and frame._label in v['contract'] and
+                start >= v['start'] and stop <= v['stop']
+            ]
         if not pc:
             frame.clear_highlight()
             tree.clear_selection()
@@ -93,6 +117,7 @@ class TextBox(ScrolledText):
             wrap="none"
         )
         self.bind('<ButtonRelease-1>', root._search)
+        self.tag_config('dark',background="#272727", foreground="#A9A9A9")
 
     def clear_highlight(self):
         self.tag_remove("sel", 1.0, "end")

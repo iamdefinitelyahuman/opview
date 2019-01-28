@@ -9,6 +9,7 @@ def set_style():
     style.configure(
         "Treeview",
         background="#383838",
+        fieldbackground="#383838",
         foreground="#ECECEC",
         font=(None, 16),
         rowheight=22
