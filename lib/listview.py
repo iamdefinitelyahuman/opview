@@ -56,6 +56,8 @@ class ListView(ttk.Treeview):
             id_="I001"
         self.see(id_)
         super().selection_set(id_)
+        self.focus_set()
+        self.focus(id_)
 
     def _select_bind(self, event):
         self.tag_configure(self._last, background='')
