@@ -37,8 +37,9 @@ class TextBox(ScrolledText):
         start = self._offset_to_coord(start)
         end = self._offset_to_coord(end)
         self.tag_add("sel", start, end)
-        self.see(end)
-        self.see(start)
+        if start != end:
+            self.see(end)
+            self.see(start)
 
     def _offset_to_coord(self, value):
         text = self.get(1.0, "end")
@@ -54,7 +55,7 @@ class TextBox(ScrolledText):
     
     def _search(self, event):
         if not self.tag_ranges('sel'):
-            tree.selection_remove(tree.selection())
+            tree.clear_selection()
             return
         start, stop = [self._coord_to_offset(i.string) for i in self.tag_ranges('sel')]
         pc = [k for k,v in pcMap.items() if 
@@ -62,6 +63,8 @@ class TextBox(ScrolledText):
             start >= v['start'] and stop <= v['stop']
         ]
         if not pc:
+            self.clear_highlight()
+            tree.clear_selection()
             return
         id_ = sorted(
             pc,
@@ -111,6 +114,9 @@ class ListView(ttk.Treeview):
             tags=tags
         )
 
+    def clear_selection(self):
+        self.selection_remove(self.selection())
+    
     def _select_bind(self, event):
         self.tag_configure(self._last, background='')
         if not self.selection():
@@ -118,9 +124,12 @@ class ListView(ttk.Treeview):
         pc = self.selection()[0]
         tag = self.item(pc, 'tags')[0]
         if tag == "NoSource":
+            note.active_frame().clear_highlight()
             return
         self.tag_configure(tag, background='#2a4864')
         self._last = tag
+        if pc == "I001":
+            pc = "0"
         if not pcMap[pc]['contract']:
             note.active_frame().clear_highlight()
             return
@@ -208,7 +217,14 @@ for contract in sorted(set(i['contract'] for i in compiled['pcMap'] if i['contra
     code = open(contract, 'r').read()
     note.add(code, contract.rsplit('/')[-1])
 
+first = compiled['pcMap'][0].copy()
 for op in compiled['pcMap']:
+    if (
+        op['contract'] == first['contract'] and
+        op['start'] == first['start'] and
+        op['stop'] == first['stop']
+    ):
+        op['contract'] = None
     if op['contract']:
         tag = "{0[start]}:{0[stop]}:{0[contract]}".format(op)
     else:
