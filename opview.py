@@ -3,9 +3,53 @@
 import os
 import json
 import sys
+import time
 import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from tkinter import ttk
+
+
+class Notebook(ttk.Notebook):
+    
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.configure(padding=0)
+        self._frames = {}
+        parent.bind("<Left>", self.key_left)
+        parent.bind("<Right>", self.key_right)
+    
+    def add(self, text, label):
+        frame = TextBox(self, width=90, height=35)
+        frame.set_text(text)
+        super().add(frame, text="   {}   ".format(label))
+        frame._id = len(self._frames)
+        frame._label = label
+        self._frames[label] = frame
+    
+    def active_frame(self):
+        id_ = self.index(self.select())
+        return next(v for v in self._frames.values() if v._id == id_)
+    
+    def is_active(self, label):
+        if self.index(self.select()) == self._frames[label]._id:
+            return True
+        return False
+    
+    def set_active(self, label):
+        self.select(self._frames[label])
+        
+    def key_left(self, event):
+        try:
+            self.select(self.index(self.select())-1)
+        except:
+            self.select(len(self._frames)-1)
+    
+    def key_right(self, event):
+        try: 
+            self.select(self.index(self.select())+1)
+        except:
+            self.select(0)
 
 
 class TextBox(ScrolledText):
@@ -70,16 +114,15 @@ class TextBox(ScrolledText):
             pc,
             key=lambda k: (start-pcMap[k]['start'])+(pcMap[k]['stop']-stop)
         )[0]
-        tree.see(id_)
         tree.selection_set(id_)
-
-
 
 
 class ListView(ttk.Treeview):
 
     def __init__(self, root, columns, **kwargs):
-        self._last = ''
+        self._last = ""
+        self._seek_buffer = ""
+        self._seek_last = 0
         self._frame = tk.Frame(root)
         super().__init__(
             self._frame,
@@ -93,13 +136,14 @@ class ListView(ttk.Treeview):
         for tag, width in columns[1:]:
             self.heading(tag, text=tag)
             self.column(tag, width=width)
-
         scroll=tk.Scrollbar(self._frame)
         scroll.pack(side="right", fill="y")
         self.configure(yscrollcommand=scroll.set)
         scroll.configure(command=self.yview)
-        self.bind("<<TreeviewSelect>>", self._select_bind)
         self.tag_configure("NoSource", background='#272727')
+        self.bind("<<TreeviewSelect>>", self._select_bind)
+        for i in range(10):
+            root.bind(str(i), self._seek)
 
     def pack(self, *args, **kwargs):
         self._frame.pack(*args, **kwargs)
@@ -135,49 +179,20 @@ class ListView(ttk.Treeview):
             return
         note.set_active(pcMap[pc]['contract'].split('/')[-1])
         note.active_frame().highlight(pcMap[pc]['start'],pcMap[pc]['stop'])
+    
+    def selection_set(self, id_):
+        if id_=="0":
+            id_="I001"
+        self.see(id_)
+        super().selection_set(id_)
 
-
-class Notebook(ttk.Notebook):
-    
-    def __init__(self,parent):
-        super().__init__(parent)
-        self.parent=parent
-        self.configure(padding=0)
-        self._frames = {}
-        parent.bind("<Left>", self.key_left)
-        parent.bind("<Right>", self.key_right)
-    
-    def add(self, text, label):
-        frame = TextBox(self, width=90, height=35)
-        frame.set_text(text)
-        super().add(frame, text="   {}   ".format(label))
-        frame._id = len(self._frames)
-        frame._label = label
-        self._frames[label] = frame
-    
-    def active_frame(self):
-        id_ = self.index(self.select())
-        return next(v for v in self._frames.values() if v._id == id_)
-    
-    def is_active(self, label):
-        if self.index(self.select()) == self._frames[label]._id:
-            return True
-        return False
-    
-    def set_active(self, label):
-        self.select(self._frames[label])
-        
-    def key_left(self, event):
-        try:
-            self.select(self.index(self.select())-1)
-        except:
-            self.select(len(self._frames)-1)
-    
-    def key_right(self, event):
-        try: 
-            self.select(self.index(self.select())+1)
-        except:
-            self.select(0)
+    def _seek(self, event):
+        if self._seek_last < time.time() - 1:
+            self._seek_buffer = ""
+        self._seek_last = time.time()
+        self._seek_buffer += event.char
+        id_ = next(str(i) for i in sorted([int(i) for i in pcMap])[::-1] if i<=int(self._seek_buffer))
+        self.selection_set(id_)
 
 
 root = tk.Tk(className="Opcode Viewer - {}".format(sys.argv[-1]))
@@ -230,7 +245,6 @@ for op in compiled['pcMap']:
     else:
         tag = "NoSource"
     tree.insert([op['pc'], op['op']], [tag])
-
 
 pcMap = dict((str(i.pop('pc')), i) for i in compiled['pcMap'])
 
