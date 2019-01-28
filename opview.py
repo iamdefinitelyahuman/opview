@@ -14,14 +14,15 @@ class TextBox(ScrolledText):
         super().__init__(*args, **kwargs)
         self['state'] = "disabled"
         self.config(
-            font=(None, 14),
+            font=("Courier", 14),
             background="#383838",
             foreground="#ECECEC",
             selectforeground="white",
             selectbackground="#4a6984",
             inactiveselectbackground="#4a6984"
         )
-    
+        self.bind('<ButtonRelease-1>', self._search)
+
     def set_text(self, text):
         self['state'] = "normal"
         self.delete(1.0, "end")
@@ -33,18 +34,43 @@ class TextBox(ScrolledText):
     
     def highlight(self, start, end):
         self.clear_highlight()
-        start = self._offset(start)
-        end = self._offset(end)
+        start = self._offset_to_coord(start)
+        end = self._offset_to_coord(end)
         self.tag_add("sel", start, end)
         self.see(start)
         self.see(end)
-        
 
-    def _offset(self, value):
+    def _offset_to_coord(self, value):
         text = self.get(1.0, "end")
         line = text[:value].count('\n') + 1
         offset = len(text[:value].split('\n')[-1])
         return "{}.{}".format(line, offset)
+
+    
+    def _coord_to_offset(self, value):
+        row, col = [int(i) for i in value.split('.')]
+        text = self.get(1.0, "end").split('\n')
+        return sum(len(i)+1 for i in text[:row-1])+col
+    
+    def _search(self, event):
+        if not self.tag_ranges('sel'):
+            tree.selection_remove(tree.selection())
+            return
+        start, stop = [self._coord_to_offset(i.string) for i in self.tag_ranges('sel')]
+        pc = [k for k,v in pcMap.items() if 
+            v['contract'] and self._label in v['contract'] and
+            start >= v['start'] and stop <= v['stop']
+        ]
+        if not pc:
+            return
+        id_ = sorted(
+            pc,
+            key=lambda k: (start-pcMap[k]['start'])+(pcMap[k]['stop']-stop)
+        )[0]
+        tree.see(id_)
+        tree.selection_set(id_)
+
+
 
 
 class ListView(ttk.Treeview):
@@ -66,10 +92,10 @@ class ListView(ttk.Treeview):
             self.column(tag, width=width)
 
         scroll=tk.Scrollbar(self._frame)
-        scroll.pack(side="right",fill="y")
+        scroll.pack(side="right", fill="y")
         self.configure(yscrollcommand=scroll.set)
         scroll.configure(command=self.yview)
-        self.bind("<<TreeviewSelect>>",self._select_bind)
+        self.bind("<<TreeviewSelect>>", self._select_bind)
 
     def pack(self, *args, **kwargs):
         self._frame.pack(*args, **kwargs)
@@ -85,9 +111,12 @@ class ListView(ttk.Treeview):
         )
 
     def _select_bind(self, event):
-        pc = self.selection()[0]
-        tag = self.item(pc,'tags')[0]
         self.tag_configure(self._last, background='')
+        if not self.selection():
+            return
+        pc = self.selection()[0]
+        tag = self.item(pc, 'tags')[0]
+        
         self.tag_configure(tag, background='#2a4864')
         self._last = tag
         if not pcMap[pc]['contract']:
@@ -112,6 +141,7 @@ class Notebook(ttk.Notebook):
         frame.set_text(text)
         super().add(frame, text="   {}   ".format(label))
         frame._id = len(self._frames)
+        frame._label = label
         self._frames[label] = frame
     
     def active_frame(self):
@@ -145,9 +175,8 @@ root.bind("<Escape>", lambda k: root.quit())
 note = Notebook(root)
 note.pack(side="left")
 
-tree = ListView(root, (("pc",80), ("opcode", 200)), height=30)
+tree = ListView(root, (("pc", 80), ("opcode", 200)), height=30)
 tree.pack(side="right")
-
 
 style = ttk.Style()
 style.configure(
@@ -174,11 +203,12 @@ style.map(
 compiled = json.load(open("build/contracts/"+sys.argv[-1]+".json"))
 
 for contract in sorted(set(i['contract'] for i in compiled['pcMap'] if i['contract'])):
-    code = open(contract,'r').read()
+    code = open(contract, 'r').read()
     note.add(code, contract.rsplit('/')[-1])
 
 for op in compiled['pcMap']:
     tree.insert([op['pc'], op['op']], ["{0[start]}:{0[stop]}:{0[contract]}".format(op)])
+
 
 pcMap = dict((str(i.pop('pc')), i) for i in compiled['pcMap'])
 
