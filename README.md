@@ -1,4 +1,4 @@
-# brownie-opview
+# opview
 
 Solidity opcode viewer for Brownie projects.
 
