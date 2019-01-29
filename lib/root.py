@@ -40,7 +40,7 @@ class Root(tk.Tk):
                 tag = "{0[start]}:{0[stop]}:{0[contract]}".format(op)
             else:
                 tag = "NoSource"
-            self.tree.insert([str(op['pc']), op['op']], [tag])
+            self.tree.insert([str(op['pc']), op['op']], [tag, op['op']])
 
         self.pcMap = dict((str(i.pop('pc')), i) for i in compiled['pcMap'])
         

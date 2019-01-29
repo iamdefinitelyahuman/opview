@@ -13,6 +13,7 @@ class ListView(ttk.Treeview):
         self._last = ""
         self._seek_buffer = ""
         self._seek_last = 0
+        self._highlighted = set()
         self._frame = tk.Frame(root)
         super().__init__(
             self._frame,
@@ -34,6 +35,7 @@ class ListView(ttk.Treeview):
         self.bind("<<TreeviewSelect>>", self._select_bind)
         self.bind('a', self._show_all)
         self.bind('s', self._show_scope)
+        self.bind('<3>', self._highlight_opcode)
         for i in range(10):
             root.bind(str(i), self._seek)
 
@@ -111,3 +113,13 @@ class ListView(ttk.Treeview):
                 self.move(key, '', key)
         self.see(self.selection()[0])
         self._parent.note.apply_scope(pc['start'], pc['stop'])
+
+    def _highlight_opcode(self, event):
+        pc = self.identify_row(event.y)
+        op = self._parent.pcMap[pc]['op']
+        if op in self._highlighted:
+            self.tag_configure(op, foreground='')
+            self._highlighted.remove(op)
+        else:
+            self.tag_configure(op, foreground='#dddd33')
+            self._highlighted.add(op)
