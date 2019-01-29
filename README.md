@@ -26,7 +26,7 @@ opview [contract name]
 
 This opens the opview GUI.
 
-![opview in action](opview.jpg)
+![opview in action](opview.png)
 
 Basic functionality is as follows:
 
