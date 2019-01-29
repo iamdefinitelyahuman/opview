@@ -3,6 +3,16 @@
 from tkinter import ttk
 
 
+TEXT_STYLE = {
+    'font':("Courier", 14),
+    'background':"#383838",
+    'foreground':"#ECECEC",
+    'selectforeground':"white",
+    'selectbackground':"#4a6984",
+    'inactiveselectbackground':"#4a6984",
+}
+
+
 def set_style():
 
     style = ttk.Style()

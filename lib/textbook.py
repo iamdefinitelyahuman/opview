@@ -1,14 +1,11 @@
 #!/usr/bin/python3
 
-import os
-import json
-import sys
-import time
 import tkinter as tk
 import tkinter.font as tkFont
-from tkinter.scrolledtext import ScrolledText
 from tkinter import ttk
 
+
+from lib.styles import TEXT_STYLE
 
 class TextBook(ttk.Notebook):
 
@@ -100,44 +97,86 @@ class TextBook(ttk.Notebook):
         tree.selection_set(id_)
 
 
-class TextBox(ScrolledText):
+class TextBox(tk.Frame):
 
     def __init__(self, root, text, *args, **kwargs):
-        super().__init__(root, *args, **kwargs)
-        self.insert(1.0, text)
-        self['state'] = "disabled"
-        self.config(
+        super().__init__(root)
+        self._text = tk.Text(
+            self,
+            yscrollcommand=self._text_scroll,
+            *args,
+            **kwargs
+        )
+        self._scroll = ttk.Scrollbar(self)
+        self._scroll.pack(side="left",fill="y")
+        self._scroll.config(command=self._scrollbar_scroll)
+        self._line_no = tk.Text(
+            self,
+            width=4,
+            height=kwargs['height'],
+            yscrollcommand=self._text_scroll
+        )
+        self._line_no.pack(side="left", fill="y")
+        self._text.pack(side="right",fill="y")
+        self._text.insert(1.0, text)
+        self._line_no.insert(1.0, '\n'.join(str(i) for i in range(1, text.count('\n')+2)))
+        self._line_no.tag_configure("justify", justify="right")
+        self._line_no.tag_add("justify", 1.0, "end")
+        
+        for text in (self._line_no, self._text):
+            text['state'] = "disabled"
+            text.config(**TEXT_STYLE)
+            text.config(
+                tabs=tkFont.Font(font=text['font']).measure('    '),
+                wrap="none"
+            )
+
+        self._line_no['state'] = "disabled"
+        self._text['state'] = "disabled"
+        self._text.config(
             font=("Courier", 14),
             background="#383838",
             foreground="#ECECEC",
             selectforeground="white",
             selectbackground="#4a6984",
             inactiveselectbackground="#4a6984",
-            tabs=tkFont.Font(font=self['font']).measure('    '),
+            tabs=tkFont.Font(font=self._text['font']).measure('    '),
             wrap="none"
         )
-        self.bind('<ButtonRelease-1>', root._search)
-        self.tag_config('dark',background="#272727", foreground="#A9A9A9")
+        self._text.bind('<ButtonRelease-1>', root._search)
+        self._text.tag_config('dark',background="#272727", foreground="#A9A9A9")
+
+    def __getattr__(self, attr):
+        return getattr(self._text, attr)
+
+    def _scrollbar_scroll(self, action, position, type=None):
+        self._text.yview_moveto(position)
+        self._line_no.yview_moveto(position)
+
+    def _text_scroll(self, first, last, type=None):
+        self._text.yview_moveto(first)
+        self._line_no.yview_moveto(first)
+        self._scroll.set(first, last)
 
     def clear_highlight(self):
-        self.tag_remove("sel", 1.0, "end")
+        self._text.tag_remove("sel", 1.0, "end")
 
     def highlight(self, start, end):
         self.clear_highlight()
         start = self._offset_to_coord(start)
         end = self._offset_to_coord(end)
-        self.tag_add("sel", start, end)
+        self._text.tag_add("sel", start, end)
         if start != end:
-            self.see(end)
-            self.see(start)
+            self._text.see(end)
+            self._text.see(start)
 
     def _offset_to_coord(self, value):
-        text = self.get(1.0, "end")
+        text = self._text.get(1.0, "end")
         line = text[:value].count('\n') + 1
         offset = len(text[:value].split('\n')[-1])
         return "{}.{}".format(line, offset)
 
     def _coord_to_offset(self, value):
         row, col = [int(i) for i in value.split('.')]
-        text = self.get(1.0, "end").split('\n')
+        text = self._text.get(1.0, "end").split('\n')
         return sum(len(i)+1 for i in text[:row-1])+col
