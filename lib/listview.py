@@ -31,11 +31,13 @@ class ListView(ttk.Treeview):
         scroll.pack(side="right", fill="y")
         self.configure(yscrollcommand=scroll.set)
         scroll.configure(command=self.yview)
-        self.tag_configure("NoSource", background='#272727')
+        self.tag_configure("NoSource", background="#272727")
         self.bind("<<TreeviewSelect>>", self._select_bind)
-        self.bind('a', self._show_all)
-        self.bind('s', self._show_scope)
-        self.bind('<3>', self._highlight_opcode)
+        root.bind("a", self._show_all)
+        root.bind("s", self._show_scope)
+        root.bind("j", self._highlight_jumps)
+        root.bind("r", self._highlight_revert)
+        self.bind("<3>", self._highlight_opcode)
         for i in range(10):
             root.bind(str(i), self._seek)
 
@@ -44,8 +46,8 @@ class ListView(ttk.Treeview):
 
     def insert(self, values, tags=[]):
         super().insert(
-            '',
-            'end',
+            "",
+            "end",
             iid=values[0],
             text=values[0],
             values=values[1:],
@@ -62,7 +64,7 @@ class ListView(ttk.Treeview):
         self.focus(id_)
 
     def _select_bind(self, event):
-        self.tag_configure(self._last, background='')
+        self.tag_configure(self._last, background="")
         try:
             pc = self.selection()[0]
         except IndexError:
@@ -73,7 +75,7 @@ class ListView(ttk.Treeview):
         if tag == "NoSource":
             note.active_frame().clear_highlight()
             return
-        self.tag_configure(tag, background='#2a4864')
+        self.tag_configure(tag, background="#2a4864")
         self._last = tag
         if not pcMap[pc]['contract']:
             note.active_frame().clear_highlight()
@@ -121,5 +123,25 @@ class ListView(ttk.Treeview):
             self.tag_configure(op, foreground='')
             self._highlighted.remove(op)
         else:
-            self.tag_configure(op, foreground='#dddd33')
+            self.tag_configure(
+                op,
+                foreground="#dddd33" if op!="REVERT" else "#dd3333"
+            )
             self._highlighted.add(op)
+
+    def _highlight_jumps(self, event):
+        for op in ("JUMP", "JUMPDEST", "JUMPI"):
+            if "JUMPI" in self._highlighted:
+                self.tag_configure(op, foreground="")
+                self._highlighted.discard(op)
+            else:
+                self.tag_configure(op, foreground="#dddd33")
+                self._highlighted.add(op)
+
+    def _highlight_revert(self, event):
+        if "REVERT" in self._highlighted:
+            self.tag_configure("REVERT", foreground="")
+            self._highlighted.discard("REVERT")
+        else:
+            self.tag_configure("REVERT", foreground="#dd3333")
+            self._highlighted.add("REVERT")

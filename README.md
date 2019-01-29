@@ -32,9 +32,11 @@ Basic functionality is as follows:
 
 * Selecting an opcode will highlight the associated source code.
 * Highlighting a section of the source will jump to the most relevent opcode, if one exists.
+* Opcodes with a darkened background have no associated source code.
 * Type a pc number to jump to that opcode.
 * Right click an opcode to toggle highlighting on all opcodes of the same type.
-* Opcodes with a darkened background have no associated source code.
+* Press ``J`` to toggle highlighting on ``JUMP``, ``JUMPI`` and ``JUMPDEST`` opcodes.
+* Press ``R`` to toggle highlighting on all ``REVERT`` opcodes.
 * Select a section of source code and press ``S`` to enter scope mode. The instructions will be filtered to only display opcodes related to the relevent code. Press ``A`` to disable and see all opcodes again.
 
 ## Development
