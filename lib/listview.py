@@ -2,7 +2,6 @@
 
 
 import time
-import tkinter as tk
 from tkinter import ttk
 
 
@@ -14,7 +13,7 @@ class ListView(ttk.Treeview):
         self._seek_buffer = ""
         self._seek_last = 0
         self._highlighted = set()
-        self._frame = tk.Frame(root)
+        self._frame = ttk.Frame(root)
         super().__init__(
             self._frame,
             columns=[i[0] for i in columns[1:]],
@@ -27,7 +26,7 @@ class ListView(ttk.Treeview):
         for tag, width in columns[1:]:
             self.heading(tag, text=tag)
             self.column(tag, width=width)
-        scroll=tk.Scrollbar(self._frame)
+        scroll=ttk.Scrollbar(self._frame)
         scroll.pack(side="right", fill="y")
         self.configure(yscrollcommand=scroll.set)
         scroll.configure(command=self.yview)

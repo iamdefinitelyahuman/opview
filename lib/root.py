@@ -18,7 +18,7 @@ class Root(tk.Tk):
         self.note.pack(side="left")
 
         self.tree = ListView(self, (("pc", 80), ("opcode", 200)), height=30)
-        self.tree.pack(side="right")
+        self.tree.pack(side="right", expand="true", fill="y")
 
         compiled = json.load(open("build/contracts/"+sys.argv[-1]+".json"))
         for contract in sorted(set(

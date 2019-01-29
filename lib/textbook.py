@@ -130,19 +130,6 @@ class TextBox(tk.Frame):
                 tabs=tkFont.Font(font=text['font']).measure('    '),
                 wrap="none"
             )
-
-        self._line_no['state'] = "disabled"
-        self._text['state'] = "disabled"
-        self._text.config(
-            font=("Courier", 14),
-            background="#383838",
-            foreground="#ECECEC",
-            selectforeground="white",
-            selectbackground="#4a6984",
-            inactiveselectbackground="#4a6984",
-            tabs=tkFont.Font(font=self._text['font']).measure('    '),
-            wrap="none"
-        )
         self._text.bind('<ButtonRelease-1>', root._search)
         self._text.tag_config('dark',background="#272727", foreground="#A9A9A9")
 

@@ -37,3 +37,21 @@ def set_style():
         background=[("active","#383838"), ("selected","#383838")],
         foreground=[("active","#ECECEC"), ("selected","#ECECEC")]
     )
+    style.configure(
+        "TFrame",
+        background="#272727",
+        foreground="#ECECEC",
+    )
+    style.configure("TScrollbar",
+        background="#272727",
+        troughcolor="#383838",
+        width=24,
+        arrowsize=16,
+        relief="flat",
+        borderwidth=0,
+        arrowcolor="#a9a9a9"
+    )
+    style.map(
+        "TScrollbar",
+        background=[('active', "#383838")]
+    )
