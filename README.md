@@ -21,10 +21,10 @@ curl https://raw.githubusercontent.com/iamdefinitelyahuman/opview/master/opview-
 In the root folder of your brownie project, type:
 
 ```bash
-opview [contract name]
+opview
 ```
 
-This opens the opview GUI.
+This opens the opview GUI. Next, select a contract from the dropdown in the upper right.
 
 ![opview in action](opview.png)
 
