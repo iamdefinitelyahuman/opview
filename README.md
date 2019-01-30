@@ -1,6 +1,6 @@
 # opview
 
-Solidity opcode viewer for Brownie projects.
+Solidity opcode viewer and unit test coverage visualizer for Brownie projects.
 
 ## Dependencies
 
@@ -31,13 +31,22 @@ This opens the opview GUI. Next, select a contract from the dropdown in the uppe
 Basic functionality is as follows:
 
 * Selecting an opcode will highlight the associated source code.
-* Highlighting a section of the source will jump to the most relevent opcode, if one exists.
+* Highlighting a section of the source will jump to the most relevent opcode, if possible.
 * Opcodes with a darkened background have no associated source code.
 * Type a pc number to jump to that opcode.
 * Right click an opcode to toggle highlighting on all opcodes of the same type.
 * Press ``J`` to toggle highlighting on ``JUMP``, ``JUMPI`` and ``JUMPDEST`` opcodes.
 * Press ``R`` to toggle highlighting on all ``REVERT`` opcodes.
 * Select a section of source code and press ``S`` to enter scope mode. The instructions will be filtered to only display opcodes related to the relevent code. Press ``A`` to disable and see all opcodes again.
+
+Press ``C`` to toggle unit test coverage visualization. This will only work if you have already run ``brownie coverage`` on your project. The coverage results are shown via different colors of text highlight:
+
+* Green - executed fully
+* Yellow - a ``JUMPI`` that evaluated ``True`` but not ``False``
+* Orange - a ``JUMPI`` that evaluated ``False`` but not ``True``
+* Red - did not execute
+
+> Brownie's test coverage evaluation is still under development, there may be undiscovered issues. Do not rely blindly on this!
 
 ## Development
 
