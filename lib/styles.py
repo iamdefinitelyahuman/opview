@@ -10,6 +10,8 @@ TEXT_STYLE = {
     'selectforeground':"white",
     'selectbackground':"#4a6984",
     'inactiveselectbackground':"#4a6984",
+    'borderwidth': 1,
+    'highlightthickness': 0,
 }
 
 
@@ -22,15 +24,22 @@ def set_style():
         fieldbackground="#383838",
         foreground="#ECECEC",
         font=(None, 16),
-        rowheight=22
+        rowheight=21,
+        borderwidth=1
     )
     style.configure(
         "Treeview.Heading",
-        background="#272727",
+        background="#161616",
         foreground="#ECECEC",
+        borderwidth=0,
         font=(None, 16)
     )
-    style.configure("TNotebook", background="#272727")
+    style.map(
+        "Treeview.Heading",
+        background=[("active","#383838"), ("selected","#383838")],
+        foreground=[("active","#ECECEC"), ("selected","#ECECEC")]
+    )
+    style.configure("TNotebook", background="#161616")
     style.configure("TNotebook.Tab", background="#272727", foreground="#a9a9a9")
     style.map(
         "TNotebook.Tab",
@@ -39,7 +48,7 @@ def set_style():
     )
     style.configure(
         "TFrame",
-        background="#272727",
+        background="#161616",
         foreground="#ECECEC",
     )
     style.configure("TScrollbar",
@@ -53,5 +62,18 @@ def set_style():
     )
     style.map(
         "TScrollbar",
-        background=[('active', "#383838")]
+        background=[('active', "#272727")]
+    )
+    style.layout(
+        'Vertical.TScrollbar', 
+        [(
+            'Vertical.Scrollbar.trough',
+            {
+                'children':[(
+                    'Vertical.Scrollbar.thumb',
+                    {'expand': '1', 'sticky': 'nswe'}
+                )],
+                'sticky': 'ns'
+            }
+        )]
     )

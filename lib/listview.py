@@ -7,20 +7,20 @@ from tkinter import ttk
 
 class ListView(ttk.Treeview):
 
-    def __init__(self, root, columns, **kwargs):
+    def __init__(self, root, parent, columns, **kwargs):
         self._parent = root
         self._last = ""
         self._seek_buffer = ""
         self._seek_last = 0
         self._highlighted = set()
-        self._frame = ttk.Frame(root)
+        self._frame = ttk.Frame(parent)
         super().__init__(
             self._frame,
             columns=[i[0] for i in columns[1:]],
             selectmode="browse",
             **kwargs
         )
-        super().pack(side="left")
+        super().pack(side="left", fill="y")
         self.heading("#0", text=columns[0][0])
         self.column("#0", width=columns[0][1])
         for tag, width in columns[1:]:
@@ -52,6 +52,10 @@ class ListView(ttk.Treeview):
             values=values[1:],
             tags=tags
         )
+
+    def delete_all(self):
+        for item in self.get_children():
+            self.delete(item)
 
     def clear_selection(self):
         self.selection_remove(self.selection())

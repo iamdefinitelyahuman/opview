@@ -4,7 +4,6 @@ import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import ttk
 
-
 from lib.styles import TEXT_STYLE
 
 class TextBook(ttk.Notebook):
@@ -14,40 +13,65 @@ class TextBook(ttk.Notebook):
         self._parent = root
         self._scope = None
         self.configure(padding=0)
-        self._frames = {}
+        self._frames = []
         root.bind("<Left>", self.key_left)
         root.bind("<Right>", self.key_right)
 
     def add(self, text, label):
+        if label in [i._label for i in self._frames]:
+            return
         frame = TextBox(self, text, width=90, height=35)
         super().add(frame, text="   {}   ".format(label))
         frame._id = len(self._frames)
         frame._label = label
-        self._frames[label] = frame
+        frame._visible = True
+        self._frames.append(frame)
+
+    def get_frame(self, label):
+        return next(i for i in self._frames if i._label == label)
+    
+    def hide(self, label):
+        frame = self.get_frame(label)
+        if frame._visible:
+            super().hide(frame)
+            frame._visible = False
+    
+    def show(self, label):
+        frame = next(i for i in self._frames if i._label == label)
+        if frame._visible:
+            return
+        frame._visible = True
+        super().add(frame, text="   {}   ".format(label))
+
+    def set_visible(self, labels):
+        for label in [i._label for i in self._frames]:
+            if label in labels:
+                self.show(label)
+            else:
+                self.hide(label)
 
     def active_frame(self):
         id_ = self.index(self.select())
-        return next(v for v in self._frames.values() if v._id == id_)
+        return self._frames[id_]
 
-    def is_active(self, label):
-        if self.index(self.select()) == self._frames[label]._id:
-            return True
-        return False
-    
+
     def set_active(self, label):
-        self.select(self._frames[label])
+        self.select(self.get_frame(label))
 
     def key_left(self, event):
-        try:
-            self.select(self.index(self.select())-1)
-        except:
-            self.select(len(self._frames)-1)
+        self._key([i for i in self._frames if i._visible][::-1])
 
     def key_right(self, event):
-        try: 
-            self.select(self.index(self.select())+1)
-        except:
-            self.select(0)
+        self._key([i for i in self._frames if i._visible])
+
+    def _key(self, visible):
+        if not visible:
+            return
+        f = self.active_frame()
+        if visible[-1]  == f:
+            self.select(visible[0])
+        else:
+            self.select(visible[visible.index(f)+1])
 
     def apply_scope(self, start, stop):
         self.clear_scope()
@@ -57,11 +81,11 @@ class TextBook(ttk.Notebook):
         stop = frame._offset_to_coord(stop)
         frame.tag_add('dark', 1.0, start)
         frame.tag_add('dark', stop, 'end')
-        for f in [v for v in self._frames.values() if v!=frame]:
+        for f in [v for v in self._frames if v!=frame]:
             f.tag_add('dark', 1.0, 'end')
 
     def clear_scope(self):
-        for f in self._frames.values():
+        for f in self._frames:
             f.tag_remove('dark', 1.0, 'end')
         self._scope = None
 
@@ -108,7 +132,7 @@ class TextBox(tk.Frame):
             **kwargs
         )
         self._scroll = ttk.Scrollbar(self)
-        self._scroll.pack(side="left",fill="y")
+        self._scroll.pack(side="left", fill="y")
         self._scroll.config(command=self._scrollbar_scroll)
         self._line_no = tk.Text(
             self,
