@@ -28,7 +28,7 @@ class Root(tk.Tk):
         self.combo.pack(side="top", expand="true", fill="x")
 
         self._show_coverage = False
-        self.bind('c', self._toggle_coverage)
+        self.bind("c", self._toggle_coverage)
 
 
     def _toggle_coverage(self, event):
@@ -36,7 +36,7 @@ class Root(tk.Tk):
         if not active:
             return
         try:
-            coverage = json.load(open('coverage.json'))[active]
+            coverage = json.load(open("build/coverage.json"))[active]
         except FileNotFoundError:
             return
         if self._show_coverage:
