@@ -22,5 +22,5 @@ class Root(tk.Tk):
         self.tree = ListView(self, frame, (("pc", 80), ("opcode", 200)), height=30)
         self.tree.pack(side="bottom")
 
-        s = SelectContract(self, frame)
-        s.pack(side="top")
+        self.combo = SelectContract(self, frame)
+        self.combo.pack(side="top", expand="true", fill="x")

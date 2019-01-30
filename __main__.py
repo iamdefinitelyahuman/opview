@@ -10,5 +10,5 @@ if not os.path.exists("build/contracts"):
     sys.exit("ERROR: build/contracts folder is missing, is this a brownie project?")
 
 root = Root()
-set_style()
+set_style(root)
 root.mainloop()

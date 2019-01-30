@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from tkinter import ttk
-
+import tkinter as tk
 
 TEXT_STYLE = {
     'font':("Courier", 14),
@@ -15,7 +15,7 @@ TEXT_STYLE = {
 }
 
 
-def set_style():
+def set_style(root):
 
     style = ttk.Style()
     style.configure(
@@ -39,8 +39,8 @@ def set_style():
         background=[("active","#383838"), ("selected","#383838")],
         foreground=[("active","#ECECEC"), ("selected","#ECECEC")]
     )
-    style.configure("TNotebook", background="#161616")
-    style.configure("TNotebook.Tab", background="#272727", foreground="#a9a9a9")
+    style.configure("TNotebook", background="#272727")
+    style.configure("TNotebook.Tab", background="#272727", foreground="#a9a9a9", font=(None, 14))
     style.map(
         "TNotebook.Tab",
         background=[("active","#383838"), ("selected","#383838")],
@@ -77,3 +77,11 @@ def set_style():
             }
         )]
     )
+    style.configure("TCombobox",foreground="#000000", background="#555555", borderwitdh=0, arrowsize=24)
+    style.map("TCombobox", background=[("active","#666666"), ("selected","#383838")],
+        fieldbackground=[("readonly","#A9A9A9")])
+    root.option_add("*TCombobox*Listbox*Font",(None,18))
+    root.option_add("*TCombobox*Listbox.foreground","#000000")
+    root.option_add("*TCombobox*Listbox.background","#A9A9A9")
+    root.option_add("*TCombobox*Listbox.selectForeground","#ECECEC")
+    root.option_add("*TCombobox*Listbox.selectBackground","#272727")

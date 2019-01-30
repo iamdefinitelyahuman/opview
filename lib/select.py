@@ -9,7 +9,7 @@ class SelectContract(ttk.Combobox):
 
     def __init__(self, root, parent):
         self._parent = root
-        super().__init__(parent, state='readonly')
+        super().__init__(parent, state='readonly', font=(None, 16))
         values = []
         for filename in sorted(os.listdir('build/contracts')):
             if filename[-5:] != '.json':
