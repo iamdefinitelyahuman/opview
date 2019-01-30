@@ -77,17 +77,23 @@ class TextBook(ttk.Notebook):
         self.clear_scope()
         frame = self.active_frame()
         self._scope = [frame, start, stop]
-        start = frame._offset_to_coord(start)
-        stop = frame._offset_to_coord(stop)
-        frame.tag_add('dark', 1.0, start)
+        frame.tag_add('dark', 0, start)
         frame.tag_add('dark', stop, 'end')
         for f in [v for v in self._frames if v!=frame]:
-            f.tag_add('dark', 1.0, 'end')
+            f.tag_add('dark', 0, 'end')
 
     def clear_scope(self):
         for f in self._frames:
-            f.tag_remove('dark', 1.0, 'end')
+            f.tag_remove('dark')
         self._scope = None
+
+    def mark(self, label, tag, start, stop):
+        frame = self.get_frame(label)
+        frame.tag_add(tag, start, stop)
+
+    def unmark(self, label, tag):
+        frame = self.get_frame(label)
+        frame.tag_remove(tag)
 
     def _search(self, event):
         frame = self.active_frame()
@@ -95,7 +101,7 @@ class TextBook(ttk.Notebook):
         if not frame.tag_ranges('sel'):
             tree.clear_selection()
             return
-        start, stop = [frame._coord_to_offset(i.string) for i in frame.tag_ranges('sel')]
+        start, stop = frame.tag_ranges('sel')
         if self._scope and (
             frame != self._scope[0] or
             start<self._scope[1] or
@@ -127,18 +133,18 @@ class TextBox(tk.Frame):
         super().__init__(root)
         self._text = tk.Text(
             self,
-            yscrollcommand=self._text_scroll,
-            *args,
-            **kwargs
+            height = 35,
+            width = 90,
+            yscrollcommand = self._text_scroll
         )
         self._scroll = ttk.Scrollbar(self)
         self._scroll.pack(side="left", fill="y")
         self._scroll.config(command=self._scrollbar_scroll)
         self._line_no = tk.Text(
             self,
-            width=4,
-            height=kwargs['height'],
-            yscrollcommand=self._text_scroll
+            height = 35,
+            width = 4,
+            yscrollcommand = self._text_scroll
         )
         self._line_no.pack(side="left", fill="y")
         self._text.pack(side="right",fill="y")
@@ -151,11 +157,13 @@ class TextBox(tk.Frame):
             text['state'] = "disabled"
             text.config(**TEXT_STYLE)
             text.config(
-                tabs=tkFont.Font(font=text['font']).measure('    '),
-                wrap="none"
+                tabs = tkFont.Font(font=text['font']).measure('    '),
+                wrap = "none"
             )
         self._text.bind('<ButtonRelease-1>', root._search)
-        self._text.tag_config('dark',background="#272727", foreground="#A9A9A9")
+        self._text.tag_config('dark', background="#272727", foreground="#A9A9A9")
+        self._text.tag_config('red', background="#dd3333")
+        self._text.tag_config('green', background="#33dd33")
 
     def __getattr__(self, attr):
         return getattr(self._text, attr)
@@ -174,13 +182,23 @@ class TextBox(tk.Frame):
 
     def highlight(self, start, end):
         self.clear_highlight()
+        self.tag_add("sel", start, end, True)
+
+    def tag_add(self, tag, start, end, see=False):
         start = self._offset_to_coord(start)
-        end = self._offset_to_coord(end)
-        self._text.tag_add("sel", start, end)
-        if start != end:
+        if type(end) is not str:
+            end = self._offset_to_coord(end)
+        self._text.tag_add(tag, start, end)
+        if see:
             self._text.see(end)
             self._text.see(start)
-
+    
+    def tag_ranges(self, tag):
+        return [self._coord_to_offset(i.string) for i in self._text.tag_ranges(tag)]
+    
+    def tag_remove(self, tag):
+        self._text.tag_remove(tag, 1.0, "end")
+    
     def _offset_to_coord(self, value):
         text = self._text.get(1.0, "end")
         line = text[:value].count('\n') + 1
