@@ -46,11 +46,11 @@ class Root(tk.Tk):
         self._show_coverage = True
         for i in coverage:
             label = i['contract'].split('/')[-1]
-            if not i['tx']:
+            if not i['count']:
                 tag = "red"
-            elif not i['jump'] or (i['true'] and i['false']):
+            elif not i['jump'] or 0 not in i['jump']:
                 tag = "green"
-            elif i['true']:
+            elif i['jump'][0]:
                 tag = "yellow"
             else:
                 tag = "orange"
