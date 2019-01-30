@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import json
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -24,3 +26,32 @@ class Root(tk.Tk):
 
         self.combo = SelectContract(self, frame)
         self.combo.pack(side="top", expand="true", fill="x")
+
+        self._show_coverage = False
+        self.bind('c', self._toggle_coverage)
+
+
+    def _toggle_coverage(self, event):
+        active = self.combo.get()
+        if not active:
+            return
+        try:
+            coverage = json.load(open('coverage.json'))[active]
+        except FileNotFoundError:
+            return
+        if self._show_coverage:
+            self.note.unmark_all('green', 'red')
+            self._show_coverage = False
+            return
+        self._show_coverage = True
+        for i in coverage:
+            label = i['contract'].split('/')[-1]
+            if not i['tx']:
+                tag = "red"
+            elif not i['jump'] or (i['true'] and i['false']):
+                tag = "green"
+            elif i['true']:
+                tag = "yellow"
+            else:
+                tag = "orange"
+            self.note.mark(label, tag, i['start'], i['stop'])

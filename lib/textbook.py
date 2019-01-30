@@ -20,7 +20,7 @@ class TextBook(ttk.Notebook):
     def add(self, text, label):
         if label in [i._label for i in self._frames]:
             return
-        frame = TextBox(self, text, width=90, height=35)
+        frame = TextBox(self, text)
         super().add(frame, text="   {}   ".format(label))
         frame._id = len(self._frames)
         frame._label = label
@@ -83,8 +83,7 @@ class TextBook(ttk.Notebook):
             f.tag_add('dark', 0, 'end')
 
     def clear_scope(self):
-        for f in self._frames:
-            f.tag_remove('dark')
+        self.unmark_all('dark')
         self._scope = None
 
     def mark(self, label, tag, start, stop):
@@ -95,6 +94,11 @@ class TextBook(ttk.Notebook):
         frame = self.get_frame(label)
         frame.tag_remove(tag)
 
+    def unmark_all(self, *tags):
+        for f in self._frames:
+            for tag in tags:
+                f.tag_remove(tag)
+    
     def _search(self, event):
         frame = self.active_frame()
         tree = self._parent.tree
@@ -129,7 +133,7 @@ class TextBook(ttk.Notebook):
 
 class TextBox(tk.Frame):
 
-    def __init__(self, root, text, *args, **kwargs):
+    def __init__(self, root, text):
         super().__init__(root)
         self._text = tk.Text(
             self,
@@ -162,20 +166,17 @@ class TextBox(tk.Frame):
             )
         self._text.bind('<ButtonRelease-1>', root._search)
         self._text.tag_config('dark', background="#272727", foreground="#A9A9A9")
-        self._text.tag_config('red', background="#dd3333")
-        self._text.tag_config('green', background="#33dd33")
+        self._text.tag_config('red', background="#882222", foreground="#FFFFFF")
+        self._text.tag_config('green', background="#228822", foreground="#FFFFFF")
+        self._text.tag_config('orange', background="#FF3300", foreground="#FFFFFF")
+        self._text.tag_config('yellow', background="#FF9933", foreground="#FFFFFF")
 
     def __getattr__(self, attr):
         return getattr(self._text, attr)
 
-    def _scrollbar_scroll(self, action, position, type=None):
-        self._text.yview_moveto(position)
-        self._line_no.yview_moveto(position)
-
-    def _text_scroll(self, first, last, type=None):
-        self._text.yview_moveto(first)
-        self._line_no.yview_moveto(first)
-        self._scroll.set(first, last)
+    def config(self, **kwargs):
+        self._text.config(**kwargs)
+        self._line_no.config(**kwargs)
 
     def clear_highlight(self):
         self._text.tag_remove("sel", 1.0, "end")
@@ -192,7 +193,7 @@ class TextBox(tk.Frame):
         if see:
             self._text.see(end)
             self._text.see(start)
-    
+
     def tag_ranges(self, tag):
         return [self._coord_to_offset(i.string) for i in self._text.tag_ranges(tag)]
     
@@ -209,3 +210,12 @@ class TextBox(tk.Frame):
         row, col = [int(i) for i in value.split('.')]
         text = self._text.get(1.0, "end").split('\n')
         return sum(len(i)+1 for i in text[:row-1])+col
+
+    def _scrollbar_scroll(self, action, position, type=None):
+        self._text.yview_moveto(position)
+        self._line_no.yview_moveto(position)
+
+    def _text_scroll(self, first, last, type=None):
+        self._text.yview_moveto(first)
+        self._line_no.yview_moveto(first)
+        self._scroll.set(first, last)
