@@ -40,7 +40,7 @@ class Root(tk.Tk):
         except FileNotFoundError:
             return
         if self._show_coverage:
-            self.note.unmark_all('green', 'red')
+            self.note.unmark_all('green', 'red', 'yellow', 'orange')
             self._show_coverage = False
             return
         self._show_coverage = True
