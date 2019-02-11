@@ -42,11 +42,11 @@ Basic functionality is as follows:
 Press ``C`` to toggle unit test coverage visualization. This will only work if you have already run ``brownie coverage`` on your project. The coverage results are shown via different colors of text highlight:
 
 * Green - executed fully
-* Yellow - a ``JUMPI`` that evaluated ``True`` but not ``False``
-* Orange - a ``JUMPI`` that evaluated ``False`` but not ``True``
+* Yellow - conditional statement that only evaluated ``True``
+* Orange - conditional statement that only evaluated ``False``
 * Red - did not execute
 
-> Brownie's test coverage evaluation is still under development, there may be undiscovered issues. Do not rely blindly on this!
+> Brownie's test coverage evaluation is still under development. There may be undiscovered issues, particularly cases where conditional True/False evaluation is incorrect. Use common sense when viewing coverage reports and please report any issues you encounter.
 
 ## Development
 
