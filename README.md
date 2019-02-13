@@ -4,16 +4,16 @@ Solidity opcode viewer and unit test coverage visualizer for Brownie projects.
 
 ## Dependencies
 
-* [brownie](https://github.com/iamdefinitelyahuman/brownie)
+* [brownie](https://github.com/HyperLink-Technology/brownie)
 * [pip](https://pypi.org/project/pip/)
-* [python3.6](https://www.python.org/downloads/release/python-368/), python3.6-tk, python3.6-venv
+* [python3](https://www.python.org/downloads/release/python-368/) version 3.6 or greater, python3-tk, python3-venv
 
 ## Installation
 
-Ubuntu:
+### Ubuntu and OSX
 
 ```bash
-curl https://raw.githubusercontent.com/iamdefinitelyahuman/opview/master/opview-install.sh | sh
+curl https://raw.githubusercontent.com/HyperLink-Technology/opview/master/opview-install.sh | sh
 ```
 
 ## Quick Usage
