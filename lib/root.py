@@ -92,4 +92,4 @@ class Source:
 
 def maxindex(source):
     comp = [i for i in [";", "}", "{"] if i in source]
-    return max([source.rindex(i) for i in ])+1
+    return max([source.rindex(i) for i in comp])+1
