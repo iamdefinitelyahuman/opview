@@ -14,9 +14,9 @@ case "$OS" in 'Linux')
 
 PY_VER=`$PY -c 'import sys; print(sys.version_info[1])'`
 
-if [[ $PY_VER<6 ]]
+if (( $PY_VER < 6 ))
 then
-echo "ERROR: Brownie requires python3.6 or greater."
+echo "ERROR: Opview requires python3.6 or greater."
 exit 1
 fi
 
