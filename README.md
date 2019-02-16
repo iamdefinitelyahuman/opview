@@ -39,7 +39,9 @@ Basic functionality is as follows:
 * Press ``R`` to toggle highlighting on all ``REVERT`` opcodes.
 * Select a section of source code and press ``S`` to enter scope mode. The instructions will be filtered to only display opcodes related to the relevent code. Press ``A`` to disable and see all opcodes again.
 
-Press ``C`` to toggle unit test coverage visualization. This will only work if you have already run ``brownie coverage`` on your project. The coverage results are shown via different colors of text highlight:
+Press ``C`` to toggle unit test coverage visualization. This will only work if you have already run ``brownie coverage`` on your project. The coverage results are shown via different colors of text highlight
+
+![opview coverage visualization](opview2.png)
 
 * Green - executed fully
 * Yellow - conditional statement that only evaluated ``True``
@@ -50,7 +52,7 @@ Press ``C`` to toggle unit test coverage visualization. This will only work if y
 
 ## Development
 
-This project is still in development and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
+This project is still in development and should be considered an early beta. Comments, questions, criticisms and pull requests are welcomed.
 
 ## License
 
