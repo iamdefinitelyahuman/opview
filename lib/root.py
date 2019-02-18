@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+import re
 
 import tkinter as tk
 from tkinter import ttk
@@ -53,10 +54,10 @@ class Root(tk.Tk):
                 tag = "green"
             # if jump[0] is true, the statement resulted in a jump
             elif i['jump'][0]:
-                tag = "yellow" if source(i) else "orange"
+                tag = "yellow" if source.evaluate_condition(i) else "orange"
             # if jump[1] is true, the statement did not result in a jump
             else:
-                tag = "orange" if source(i) else "yellow"
+                tag = "orange" if source.evaluate_condition(i) else "yellow"
             self.note.mark(label, tag, i['start'], i['stop'])
 
 
@@ -67,16 +68,23 @@ class Source:
 
     # evaluate surrounding source code to determine if a jump
     # occured because a statement evaluated true or false
-    def __call__(self, op):
+    def evaluate_condition(self, op):
         path = op['contract']
         if path not in self._s:
             self._s[path] = open(path).read()
         s = self._s[path]
         try:
-            idx = maxindex(s[:op['start']])
+            idx = _maxindex(s[:op['start']])
         except:
             return False
-        before = s[idx:op['start']].strip("\n\t (")
+
+        # remove comments, strip whitespace
+        before = s[idx:op['start']]
+        for pattern in ('\/\*[\s\S]*?\*\/', '\/\/[^\n]*'):
+            for i in re.findall(pattern, before):
+                before = before.replace(i, "")
+        before = before.strip("\n\t (")
+
         idx = s[op['stop']:].index(';')+len(s[:op['stop']])
         if idx <= op['stop']:
             return False
@@ -90,6 +98,6 @@ class Source:
         return False
 
 
-def maxindex(source):
+def _maxindex(source):
     comp = [i for i in [";", "}", "{"] if i in source]
     return max([source.rindex(i) for i in comp])+1
