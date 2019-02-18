@@ -1,3 +1,10 @@
+0.1.1
+-----
+
+ - Display comments in different color
+ - move text colors to styles.py
+ - Bugfix - incorrect conditional evaluation when preceded by comment
+
 0.1.0
 -----
 
