@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
+import re
 import tkinter as tk
 import tkinter.font as tkFont
 from tkinter import ttk
 
-from lib.styles import TEXT_STYLE
+from lib.styles import TEXT_STYLE, TEXT_COLORS
 
 class TextBook(ttk.Notebook):
 
@@ -53,7 +54,6 @@ class TextBook(ttk.Notebook):
     def active_frame(self):
         id_ = self.index(self.select())
         return self._frames[id_]
-
 
     def set_active(self, label):
         self.select(self.get_frame(label))
@@ -151,12 +151,22 @@ class TextBox(tk.Frame):
             yscrollcommand = self._text_scroll
         )
         self._line_no.pack(side="left", fill="y")
+
         self._text.pack(side="right",fill="y")
         self._text.insert(1.0, text)
+
+        for k,v in TEXT_COLORS.items():
+            self._text.tag_config(k, **v)
+
+        for pattern in ('\/\*[\s\S]*?\*\/', '\/\/[^\n]*'):
+            for i in re.findall(pattern, text):
+                idx = text.index(i)
+                self.tag_add('comment',idx,idx+len(i))
+
         self._line_no.insert(1.0, '\n'.join(str(i) for i in range(1, text.count('\n')+2)))
         self._line_no.tag_configure("justify", justify="right")
         self._line_no.tag_add("justify", 1.0, "end")
-        
+
         for text in (self._line_no, self._text):
             text['state'] = "disabled"
             text.config(**TEXT_STYLE)
@@ -165,11 +175,6 @@ class TextBox(tk.Frame):
                 wrap = "none"
             )
         self._text.bind('<ButtonRelease-1>', root._search)
-        self._text.tag_config('dark', background="#272727", foreground="#A9A9A9")
-        self._text.tag_config('red', background="#882222", foreground="#FFFFFF")
-        self._text.tag_config('green', background="#228822", foreground="#FFFFFF")
-        self._text.tag_config('orange', background="#FF3300", foreground="#FFFFFF")
-        self._text.tag_config('yellow', background="#FF9933", foreground="#FFFFFF")
 
     def __getattr__(self, attr):
         return getattr(self._text, attr)

@@ -14,6 +14,15 @@ TEXT_STYLE = {
     'highlightthickness': 0,
 }
 
+TEXT_COLORS = {
+    'comment': {'foreground': "#868686"},
+    'dark': {'background': "#272727", 'foreground': "#A9A9A9"},
+    'red': {'background': "#882222", 'foreground': "#FFFFFF"},
+    'green': {'background': "#228822", 'foreground': "#FFFFFF"},
+    'orange': {'background': "#FF3300", 'foreground': "#FFFFFF"},
+    'yellow': {'background': "#FF9933", 'foreground': "#FFFFFF"}
+}
+
 
 def set_style(root):
 
