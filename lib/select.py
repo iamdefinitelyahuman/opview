@@ -15,7 +15,7 @@ class SelectContract(ttk.Combobox):
             if filename[-5:] != '.json':
                 continue
             source = _load(filename)
-            if not source['deployedBytecode']:
+            if source['type'] == "interface":
                 continue
             values.append(source['contractName'])
             root.note.add(source['source'], source['sourcePath'].split('/')[-1])
