@@ -2,6 +2,8 @@
 
 Solidity opcode viewer and unit test coverage visualizer for Brownie projects.
 
+Opview as a standalone program has been deprecated. It is available directly from [Brownie](https://github.com/HyperLink-Technology/brownie) with the command `brownie gui`. This repo has been archived.
+
 ## Dependencies
 
 * [brownie](https://github.com/HyperLink-Technology/brownie)
